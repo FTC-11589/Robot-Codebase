@@ -1,14 +1,22 @@
 package org.firstinspires.ftc.teamcode.utilities;
 
-import org.firstinspires.ftc.robotcore.external.Func;
-import org.firstinspires.ftc.robotcore.external.Function;
+public class ValueTools {
+    public enum MotionType {NONE, FORWARD, BACKWARD}
 
-public final class ValueTools
-{
-    private ValueTools() { }
+    public static MotionType getMotionType(double power) {
+        return MotionType.values()[(int)Math.ceil(Math.signum(power) >= 0 ? power : -power + 1)];
+    }
 
-    public static <T, R> R Coalesce(T value, Function<T, R> operator)
-    {
-        return operator != null && value != null ? operator.apply(value) : null;
+    public static char getMotionTypeChar(double power) {
+        switch (getMotionType(power))
+        {
+            case BACKWARD:
+                return '▼';
+            case FORWARD:
+                return '▲';
+            default:
+            case NONE:
+                return '■';
+        }
     }
 }

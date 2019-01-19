@@ -8,8 +8,6 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.utilities.IMU;
-
 public class Robot {
 
     public DcMotorEx backLeftDriveMotor, backRightDriveMotor, elevatorMotor;
