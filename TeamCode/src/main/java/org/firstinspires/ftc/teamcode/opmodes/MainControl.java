@@ -12,6 +12,8 @@ import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.teamcode.utilities.OperationTools;
 import org.firstinspires.ftc.teamcode.utilities.ValueTools;
 
+import static org.firstinspires.ftc.teamcode.utilities.OperationTools.apply;
+
 @TeleOp
 public final class MainControl extends OpMode {
     private DcMotorEx backLeftDriveMotor, backRightDriveMotor, baseSlideMotor, extensionSlideMotor;
@@ -19,7 +21,7 @@ public final class MainControl extends OpMode {
 
     private CRServo leftArmHingeServo, rightArmHingeServo;
 
-    ElapsedTime timer = new ElapsedTime();
+    private ElapsedTime timer = new ElapsedTime();
 
     @Override
     public void init() {
@@ -32,13 +34,13 @@ public final class MainControl extends OpMode {
         rightArmHingeServo = hardwareMap.crservo.get("arm_hinge_right");
         leftArmHingeServo = hardwareMap.crservo.get("arm_hinge_left");
 
-        OperationTools.apply(device -> device.setDirection(DcMotorSimple.Direction.REVERSE), backLeftDriveMotor, leftIntakeMotor, extensionSlideMotor, leftArmHingeServo);
-        OperationTools.apply(device -> device.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER), baseSlideMotor, extensionSlideMotor);
-        OperationTools.apply(device -> device.setMode(DcMotor.RunMode.RUN_USING_ENCODER), backRightDriveMotor, backLeftDriveMotor, baseSlideMotor, extensionSlideMotor);
-        OperationTools.apply(device -> device.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE), backLeftDriveMotor, backRightDriveMotor, baseSlideMotor, extensionSlideMotor);
+        apply(device -> device.setDirection(DcMotorSimple.Direction.REVERSE), backLeftDriveMotor, leftIntakeMotor, extensionSlideMotor, leftArmHingeServo);
+        apply(device -> device.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER), baseSlideMotor, extensionSlideMotor);
+        apply(device -> device.setMode(DcMotor.RunMode.RUN_USING_ENCODER), backRightDriveMotor, backLeftDriveMotor, baseSlideMotor, extensionSlideMotor);
+        apply(device -> device.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE), backLeftDriveMotor, backRightDriveMotor, baseSlideMotor, extensionSlideMotor);
 
         telemetry.setAutoClear(true);
-        telemetry.setCaptionValueSeparator("\r\n");
+        telemetry.setCaptionValueSeparator("\r\n\t");
         telemetry.setItemSeparator(telemetry.getCaptionValueSeparator());
 
         telemetry.addData("Program Status", "Initialized");
@@ -51,18 +53,21 @@ public final class MainControl extends OpMode {
 
     @Override
     public void loop() {
+        final double GEARED_POWER_FACTOR = 80.0 / 120, REFERENCE_TARGET_SLIDE_POWER = Range.clip(gamepad2.left_trigger - gamepad2.right_trigger, -1.0, 1.0);
+
         backLeftDriveMotor.setPower(Range.clip(-gamepad1.left_stick_y + gamepad1.left_stick_x, -1.0, 1.0));
         backRightDriveMotor.setPower(Range.clip(-gamepad1.left_stick_y - gamepad1.left_stick_x, -1.0, 1.0));
 
         if (gamepad1.y)
-            OperationTools.apply(device -> device.setPower(1), leftIntakeMotor, rightIntakeMotor);
+            apply(device -> device.setPower(1), leftIntakeMotor, rightIntakeMotor);
         else if (gamepad1.a)
-            OperationTools.apply(device -> device.setPower(-1), leftIntakeMotor, rightIntakeMotor);
+            apply(device -> device.setPower(-1), leftIntakeMotor, rightIntakeMotor);
         else if (gamepad1.x)
-            OperationTools.apply(device -> device.setPower(0), leftIntakeMotor, rightIntakeMotor);
+            apply(device -> device.setPower(0), leftIntakeMotor, rightIntakeMotor);
 
-        OperationTools.apply(device -> device.setPower(Range.clip(gamepad2.left_trigger - gamepad2.right_trigger, -1.0, 1.0)), baseSlideMotor, extensionSlideMotor);
-        OperationTools.apply(device -> device.setPower(Range.clip(-gamepad2.right_stick_y, -1.0, 1.0)), leftArmHingeServo, rightArmHingeServo);
+        baseSlideMotor.setPower(REFERENCE_TARGET_SLIDE_POWER);
+        extensionSlideMotor.setPower(REFERENCE_TARGET_SLIDE_POWER * GEARED_POWER_FACTOR);
+        apply(device -> device.setPower(Range.clip(-gamepad2.right_stick_y, -1.0, 1.0)), leftArmHingeServo, rightArmHingeServo);
 
         telemetry.addData("Slide State", "base " + ValueTools.getMotionTypeChar(baseSlideMotor.getPower()) + ": " + baseSlideMotor.getCurrentPosition() + ", extension " + ValueTools.getMotionTypeChar(extensionSlideMotor.getPower()) + ": " + extensionSlideMotor.getCurrentPosition());
         telemetry.addData("Particle Containment Storage Arm Hinge Position/Inclination", "left " + ValueTools.getMotionTypeChar(leftArmHingeServo.getPower()) + ": " + leftArmHingeServo.getPower() + ", right " + ValueTools.getMotionTypeChar(rightArmHingeServo.getPower()) + ": " + rightArmHingeServo.getPower());
