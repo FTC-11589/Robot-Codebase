@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.autonomous.testing;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.teamcode.Robot;
+import org.firstinspires.ftc.teamcode.autonomous.Robot;
 import org.firstinspires.ftc.teamcode.autonomous.Auto;
 import org.firstinspires.ftc.teamcode.utilities.GoldDetector;
 
@@ -20,6 +20,8 @@ public class MineralSamplingTest extends LinearOpMode
         // Initialize objects
         robot = new Robot(hardwareMap);
         auto = new Auto(this, robot);
+
+        auto.initSampling();
 
         waitForStart();
 

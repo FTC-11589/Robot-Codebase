@@ -7,7 +7,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.teamcode.Robot;
+import org.firstinspires.ftc.teamcode.autonomous.Robot;
 import org.firstinspires.ftc.teamcode.utilities.GoldDetector;
 import org.firstinspires.ftc.teamcode.utilities.Navigation;
 import org.firstinspires.ftc.teamcode.utilities.field.FieldMap;
@@ -36,9 +36,14 @@ public class Auto {
         this.robot = robot;
         fieldMap = new FieldMap();
 
+    }
+
+    public void initNavigation() {
         navigation = new Navigation(opMode.hardwareMap, robot.CAMERA_FORWARD_DISPLACEMENT, robot.CAMERA_LEFT_DISPLACEMENT);
         navigation.setupTracker();
+    }
 
+    public void initSampling() {
         goldDetector = new GoldDetector(opMode.hardwareMap);
         goldDetector.initVuforia();
         goldDetector.initTfod();
@@ -175,7 +180,7 @@ public class Auto {
         robot.backRightDriveMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         robot.backLeftDriveMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        int position = (int)(distance / robot.WHEEL_DIAMETER) * robot.TICKS_PER_REVOLUTION;
+        int position = (int)(distance / Math.PI * robot.WHEEL_DIAMETER) * robot.TICKS_PER_REVOLUTION;
         robot.backRightDriveMotor.setTargetPosition(position);
         robot.backLeftDriveMotor.setTargetPosition(position);
 
@@ -193,17 +198,20 @@ public class Auto {
     /**
      * Attempts to sample the field for a gold mineral
      */
-    public GoldDetector.Position attemptSampleMinerals() {
+    public GoldDetector.Position attemptSampleMinerals(int timeout) {
         GoldDetector.Position goldPos = GoldDetector.Position.NONE;
 
         goldDetector.activateTfod();
 
-        while(opMode.opModeIsActive()) {
+        opMode.resetStartTime();
+        while(opMode.opModeIsActive() && opMode.getRuntime() <= timeout) {
             goldPos = goldDetector.find();
             if(goldPos != GoldDetector.Position.NONE) {
                 break;
             }
         }
+
+        goldDetector.shutdownTfod();
 
         return goldPos;
     }

@@ -3,15 +3,19 @@ package org.firstinspires.ftc.teamcode.autonomous.testing;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.teamcode.Robot;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.teamcode.autonomous.Robot;
 import org.firstinspires.ftc.teamcode.autonomous.Auto;
-import org.firstinspires.ftc.teamcode.utilities.GoldDetector;
 
-@Autonomous(name="[TEST] Mineral Sampling Test", group = "Tests")
-public class MineralSamplingTest extends LinearOpMode
+@Autonomous(name="[TEST] Unlatching Test", group = "Tests")
+public class UnlatchingTest extends LinearOpMode
 {
     Robot robot;
     Auto auto;
+    Orientation lastOrientation;
 
     @Override
     public void runOpMode() throws InterruptedException
@@ -21,17 +25,30 @@ public class MineralSamplingTest extends LinearOpMode
         robot = new Robot(hardwareMap);
         auto = new Auto(this, robot);
 
-        waitForStart();
+        // Make sure the imu gyro is calibrated before continuing.
+        telemetry.addData("Mode", "calibrating...");
+        telemetry.update();
+        while (!isStopRequested() && !robot.imu.isGyroCalibrated())
+        {
+            sleep(50);
+            idle();
+        }
 
-        telemetry.addData("Mode", "running");
+        telemetry.addData("Mode", "waiting for start");
+        telemetry.addData("imu calib status", robot.imu.getCalibrationStatus().toString());
         telemetry.update();
 
-        while (opModeIsActive()) {
-            GoldDetector.Position goldPos = auto.attemptSampleMinerals();
+        waitForStart();
 
-            telemetry.addData("Gold Mineral Position", goldPos.toString());
-            telemetry.update();
+        lastOrientation = robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+
+        while(opModeIsActive() && lastOrientation.secondAngle < 1 && lastOrientation.thirdAngle < 88) {
+            robot.extensionSlideMotor.setPower(0.5);
+            lastOrientation = robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         }
+
+        auto.rotate(180, 0.7);
+
     }
 
 
