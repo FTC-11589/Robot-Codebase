@@ -14,7 +14,7 @@ public class ManualControlOpMode extends OpMode
 {
     DcMotorEx backLeftDriveMotor, backRightDriveMotor, elevatorMotor;
     DcMotor leftCollectorFeederMotor, rightCollectorFeederMotor;
-    Servo collectorServo, armHingeServo;
+    Servo armHingeRightServo, armHingeLeftServo;
     ElapsedTime timer = new ElapsedTime();
 
     @Override
@@ -25,8 +25,9 @@ public class ManualControlOpMode extends OpMode
         elevatorMotor = (DcMotorEx) hardwareMap.dcMotor.get("elevator");
         leftCollectorFeederMotor = hardwareMap.dcMotor.get("feeder_left");
         rightCollectorFeederMotor = hardwareMap.dcMotor.get("feeder_right");
-        collectorServo = hardwareMap.servo.get("collector_hinge");
-        armHingeServo = hardwareMap.servo.get("arm_hinge");
+        armHingeRightServo = hardwareMap.servo.get("arm_hinge_right");
+        armHingeLeftServo = hardwareMap.servo.get("arm_hinge_left");
+
 
         backLeftDriveMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         leftCollectorFeederMotor.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -62,6 +63,10 @@ public class ManualControlOpMode extends OpMode
         backRightDriveMotor.setMotorEnable();
         backLeftDriveMotor.setMotorEnable();
         elevatorMotor.setMotorEnable();
+
+        armHingeLeftServo.setPosition(0);
+        armHingeRightServo.setPosition(0);
+
     }
 
     @Override
@@ -88,12 +93,12 @@ public class ManualControlOpMode extends OpMode
 
         elevatorMotor.setPower(Range.clip(gamepad2.left_trigger - gamepad2.right_trigger, -1.0, 1.0));
 
-        armHingeServo.setPosition(Range.clip(armHingeServo.getPosition() - gamepad2.right_stick_y * 0.01, -1.0, 1.0));
-        collectorServo.setPosition(Range.clip(collectorServo.getPosition() - gamepad2.left_stick_y * 0.01, -1.0, 1.0));
+        armHingeRightServo.setPosition(Range.clip(armHingeRightServo.getPosition() - gamepad2.right_stick_y * 0.01, -1.0, 1.0));
+        armHingeLeftServo.setPosition(armHingeRightServo.getPosition());
 
         telemetry.addData("Slide Position", elevatorMotor.getCurrentPosition());
-        telemetry.addData("Arm Hinge Position", armHingeServo.getPosition());
-        telemetry.addData("Collector Position", collectorServo.getPosition());
+        telemetry.addData("Arm Hinge Right Position", armHingeRightServo.getPosition());
+        telemetry.addData("Arm Hinge Left Position", armHingeLeftServo.getPosition());
         telemetry.addData("Feeder State", "Spinning " + (leftCollectorFeederMotor.getPower() == 0 ? "Stopped" : leftCollectorFeederMotor.getPower() > 0 ? "Forward" : "Backward"));
     }
 

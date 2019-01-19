@@ -1,109 +1,73 @@
 package org.firstinspires.ftc.teamcode.autonomous;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 
-import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
+import org.firstinspires.ftc.teamcode.Robot;
+import org.firstinspires.ftc.teamcode.utilities.Navigation;
 
-@Autonomous(name="Autonomous Mode")
-public class AutonomousOpMode extends LinearOpMode {
-
-    final double WHEEL_CIRCUMFERENCE = 12.56;
-
-    DcMotorEx backLeftDriveMotor, backRightDriveMotor, elevatorMotor;
-    DcMotor leftCollectorFeederMotor, rightCollectorFeederMotor;
-    Servo collectorServo, armHingeServo;
-    ElapsedTime timer = new ElapsedTime();
-
-    BNO055IMU imu;
-
-    // State used for updating telemetry
-    Orientation angle;
-    Acceleration gravity;
+@Autonomous(name="Drive Avoid Imu", group="Exercises")
+public class AutonomousOpMode extends LinearOpMode
+{
+    Robot robot;
+    Auto auto;
 
     @Override
-    public void runOpMode() throws InterruptedException {
-        backRightDriveMotor = (DcMotorEx) hardwareMap.dcMotor.get("drive_right");
-        backLeftDriveMotor = (DcMotorEx) hardwareMap.dcMotor.get("drive_left");
-        elevatorMotor = (DcMotorEx) hardwareMap.dcMotor.get("elevator");
-        leftCollectorFeederMotor = hardwareMap.dcMotor.get("feeder_left");
-        rightCollectorFeederMotor = hardwareMap.dcMotor.get("feeder_right");
-        collectorServo = hardwareMap.servo.get("collector_hinge");
-        armHingeServo = hardwareMap.servo.get("arm_hinge");
+    public void runOpMode() throws InterruptedException
+    {
 
-        backLeftDriveMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        leftCollectorFeederMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        // Initialize objects
+        robot = new Robot(hardwareMap);
+        auto = new Auto(this, robot);
 
-        backRightDriveMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        backLeftDriveMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        elevatorMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        elevatorMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        backRightDriveMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        backLeftDriveMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        elevatorMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        // Make sure the imu gyro is calibrated before continuing.
+        telemetry.addData("Mode", "calibrating...");
+        telemetry.update();
+        while (!isStopRequested() && !robot.imu.isGyroCalibrated())
+        {
+            sleep(50);
+            idle();
+        }
 
-        telemetry.setAutoClear(true);
-        telemetry.setCaptionValueSeparator("\r\n");
-        telemetry.setItemSeparator(telemetry.getCaptionValueSeparator());
 
-        telemetry.addData("Program Status", "Initialized");
-
-        backRightDriveMotor.setMotorEnable();
-        backLeftDriveMotor.setMotorEnable();
-        elevatorMotor.setMotorEnable();
+        telemetry.addData("Mode", "waiting for start");
+        telemetry.addData("imu calib status", robot.imu.getCalibrationStatus().toString());
+        telemetry.update();
 
         waitForStart();
 
+        telemetry.addData("Mode", "running");
+        telemetry.update();
 
+        // Face navigation target
+        auto.rotate(80, 0.2);
 
-        // Step 1: Land Robot
-        elevatorMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        elevatorMotor.setTargetPosition(-8435);
-        elevatorMotor.setPower(0.25);
-        while (opModeIsActive() && elevatorMotor.isBusy())
-        {
-            telemetry.addData("encoder-fwd", elevatorMotor.getCurrentPosition() + "  busy=" + elevatorMotor.isBusy());
-            telemetry.update();
+        // Drive towards target
+        auto.driveForDistance(4, 0.8);
+
+        // Find location of robot on the field
+        auto.attemptFindNavigationalTarget();
+
+        telemetry.addData("Location (X)", auto.robotPos.getX());
+        telemetry.addData("Location (Y)", auto.robotPos.getY());
+        telemetry.addData("Heading", auto.robotAngle);
+
+        telemetry.update();
+
+        while(opModeIsActive()) {
+
         }
-        elevatorMotor.setPower(0.0);
-
-        // Step 2: Move
-
-        resetStartTime();
-        while(opModeIsActive() && getRuntime() < 1.75) {
-            backLeftDriveMotor.setPower(0.5);
-            backRightDriveMotor.setPower(-0.5);
-        }
-
-
-        // Drive to depot
-        backLeftDriveMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        backRightDriveMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        backLeftDriveMotor.setTargetPosition((int)(1440 * (91.4/WHEEL_CIRCUMFERENCE)));
-        backRightDriveMotor.setTargetPosition((int)(1440 * (91.4/WHEEL_CIRCUMFERENCE)));
-
-        while (opModeIsActive() && backRightDriveMotor.isBusy() && backLeftDriveMotor.isBusy()) {
-            backLeftDriveMotor.setPower(1);
-            backRightDriveMotor.setPower(1);
-        }
-
-        backLeftDriveMotor.setPower(0);
-        backRightDriveMotor.setPower(0);
-
     }
+
+
 }
