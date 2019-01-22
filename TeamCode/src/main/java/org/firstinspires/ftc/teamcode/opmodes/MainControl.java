@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.opmodes;
 
+import android.transition.Slide;
+
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -9,7 +11,6 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.teamcode.utilities.OperationTools;
 import org.firstinspires.ftc.teamcode.utilities.ValueTools;
 
 import static org.firstinspires.ftc.teamcode.utilities.OperationTools.apply;
@@ -22,6 +23,10 @@ public final class MainControl extends OpMode {
     private CRServo leftArmHingeServo, rightArmHingeServo;
 
     private ElapsedTime timer = new ElapsedTime();
+
+    private SlideSelectionState slideSelection = SlideSelectionState.BASE;
+
+    enum SlideSelectionState {BASE, EXTENSION, BOTH}
 
     @Override
     public void init() {
@@ -65,11 +70,37 @@ public final class MainControl extends OpMode {
         else if (gamepad1.x)
             apply(device -> device.setPower(0), leftIntakeMotor, rightIntakeMotor);
 
-        baseSlideMotor.setPower(REFERENCE_TARGET_SLIDE_POWER);
-        extensionSlideMotor.setPower(REFERENCE_TARGET_SLIDE_POWER * GEARED_POWER_FACTOR);
+        if (gamepad2.b)
+            switch (slideSelection)
+            {
+                case BASE:
+                    slideSelection = SlideSelectionState.EXTENSION;
+                    break;
+                case EXTENSION:
+                    slideSelection = SlideSelectionState.BOTH;
+                    break;
+                case BOTH:
+                    slideSelection = SlideSelectionState.BASE;
+                    break;
+            }
+
+        switch (slideSelection)
+        {
+            case BASE:
+                baseSlideMotor.setPower(REFERENCE_TARGET_SLIDE_POWER);
+                break;
+            case EXTENSION:
+                extensionSlideMotor.setPower(REFERENCE_TARGET_SLIDE_POWER * GEARED_POWER_FACTOR);
+                break;
+            case BOTH:
+                baseSlideMotor.setPower(REFERENCE_TARGET_SLIDE_POWER);
+                extensionSlideMotor.setPower(REFERENCE_TARGET_SLIDE_POWER * GEARED_POWER_FACTOR);
+                break;
+        }
         apply(device -> device.setPower(Range.clip(-gamepad2.right_stick_y, -1.0, 1.0)), leftArmHingeServo, rightArmHingeServo);
 
-        telemetry.addData("Slide State", "base " + ValueTools.getMotionTypeChar(baseSlideMotor.getPower()) + ": " + baseSlideMotor.getCurrentPosition() + ", extension " + ValueTools.getMotionTypeChar(extensionSlideMotor.getPower()) + ": " + extensionSlideMotor.getCurrentPosition());
+        telemetry.addData("Slide State [" + slideSelection + "]", "base " + ValueTools.getMotionTypeChar(baseSlideMotor.getPower()) + ": " + baseSlideMotor.getCurrentPosition() + ", extension "+ ValueTools.getMotionTypeChar(extensionSlideMotor.getPower()) + ": " + extensionSlideMotor.getCurrentPosition());
+        telemetry.addData("Slide State", "base: " + baseSlideMotor.getCurrentPosition());
         telemetry.addData("Particle Containment Storage Arm Hinge Position/Inclination", "left " + ValueTools.getMotionTypeChar(leftArmHingeServo.getPower()) + ": " + leftArmHingeServo.getPower() + ", right " + ValueTools.getMotionTypeChar(rightArmHingeServo.getPower()) + ": " + rightArmHingeServo.getPower());
         telemetry.addData("Intake System State", "left: " + ValueTools.getMotionTypeChar(leftIntakeMotor.getPower()) + " " + ValueTools.getMotionType(leftIntakeMotor.getPower()) + ", right: " + ValueTools.getMotionTypeChar(rightIntakeMotor.getPower()) + " " + ValueTools.getMotionType(rightIntakeMotor.getPower()));
     }

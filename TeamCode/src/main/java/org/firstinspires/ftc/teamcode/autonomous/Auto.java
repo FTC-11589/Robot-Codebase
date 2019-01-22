@@ -177,10 +177,13 @@ public class Auto {
      * Drives a specific distance
      */
     public void driveForDistance(double distance, double power) {
+        robot.backRightDriveMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.backRightDriveMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
         robot.backRightDriveMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         robot.backLeftDriveMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        int position = (int)(distance / Math.PI * robot.WHEEL_DIAMETER) * robot.TICKS_PER_REVOLUTION;
+        int position = (int)(distance / (Math.PI * robot.WHEEL_DIAMETER)) * robot.TICKS_PER_REVOLUTION;
         robot.backRightDriveMotor.setTargetPosition(position);
         robot.backLeftDriveMotor.setTargetPosition(position);
 

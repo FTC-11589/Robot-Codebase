@@ -29,7 +29,7 @@ public class MineralSamplingTest extends LinearOpMode
         telemetry.update();
 
         while (opModeIsActive()) {
-            GoldDetector.Position goldPos = auto.attemptSampleMinerals();
+            GoldDetector.Position goldPos = auto.attemptSampleMinerals(5);
 
             telemetry.addData("Gold Mineral Position", goldPos.toString());
             telemetry.update();

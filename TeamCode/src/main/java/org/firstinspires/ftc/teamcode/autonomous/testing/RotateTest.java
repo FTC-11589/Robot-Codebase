@@ -5,10 +5,9 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.autonomous.Auto;
 import org.firstinspires.ftc.teamcode.autonomous.Robot;
-import org.firstinspires.ftc.teamcode.utilities.GoldDetector;
 
-@Autonomous(name="[TEST] Drive Distance Test", group = "Tests")
-public class DriveDistanceTest extends LinearOpMode
+@Autonomous(name="[TEST] Rotate Test", group = "Tests")
+public class RotateTest extends LinearOpMode
 {
     Robot robot;
     Auto auto;
@@ -23,11 +22,13 @@ public class DriveDistanceTest extends LinearOpMode
 
         waitForStart();
 
-        auto.driveForDistance(5, 0.8);
+        auto.rotate(90, 0.3);
+        auto.rotate(90, 0.3);
 
-        while (opModeIsActive()) {
+        auto.rotate(-90, 0.3);
+        auto.rotate(-90, 0.3);
 
-        }
+
 
 
     }
