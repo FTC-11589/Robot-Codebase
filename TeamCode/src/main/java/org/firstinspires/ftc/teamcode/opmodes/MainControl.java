@@ -70,7 +70,7 @@ public final class MainControl extends OpMode {
         else if (gamepad1.x)
             apply(device -> device.setPower(0), leftIntakeMotor, rightIntakeMotor);
 
-        if (slideControlSwapButton.currentValue && slideControlSwapButton.previousValue)
+        if (slideControlSwapButton.currentValue && !slideControlSwapButton.previousValue)
             switch (slideSelection)
             {
                 case BASE:
