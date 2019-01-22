@@ -5,11 +5,17 @@ import android.support.annotation.NonNull;
 import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Function;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public final class TrackedValue<T>
 {
+    private static List<TrackedValue> instances = new ArrayList<>();
+
     public TrackedValue(@NonNull Func<T> valueGenerator)
     {
         generator = valueGenerator;
+        instances.add(this);
         update();
     }
 
@@ -21,12 +27,18 @@ public final class TrackedValue<T>
 
     public T previousValue, currentValue;
 
-    Func<T> generator;
-    Function<T, T> coercer = value -> value;
+    private Func<T> generator;
+    private Function<T, T> coercer = value -> value;
 
     public T update()
     {
         previousValue = currentValue;
         return currentValue = coercer.apply(generator.value());
+    }
+
+    public static void updateAll()
+    {
+        for (TrackedValue instance : instances)
+            instance.update();
     }
 }

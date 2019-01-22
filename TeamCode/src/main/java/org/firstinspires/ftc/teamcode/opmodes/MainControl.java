@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.teamcode.utilities.TrackedValue;
 import org.firstinspires.ftc.teamcode.utilities.ValueTools;
 
 import static org.firstinspires.ftc.teamcode.utilities.OperationTools.apply;
@@ -19,12 +20,10 @@ import static org.firstinspires.ftc.teamcode.utilities.OperationTools.apply;
 public final class MainControl extends OpMode {
     private DcMotorEx backLeftDriveMotor, backRightDriveMotor, baseSlideMotor, extensionSlideMotor;
     private DcMotor leftIntakeMotor, rightIntakeMotor;
-
     private CRServo leftArmHingeServo, rightArmHingeServo;
-
     private ElapsedTime timer = new ElapsedTime();
-
     private SlideSelectionState slideSelection = SlideSelectionState.BASE;
+    private TrackedValue<Boolean> slideControlSwapButton = new TrackedValue<>(() -> gamepad2.b);
 
     enum SlideSelectionState {BASE, EXTENSION, BOTH}
 
@@ -58,6 +57,7 @@ public final class MainControl extends OpMode {
 
     @Override
     public void loop() {
+        slideControlSwapButton.update();
         final double GEARED_POWER_FACTOR = 80.0 / 120, REFERENCE_TARGET_SLIDE_POWER = Range.clip(gamepad2.left_trigger - gamepad2.right_trigger, -1.0, 1.0);
 
         backLeftDriveMotor.setPower(Range.clip(-gamepad1.left_stick_y + gamepad1.left_stick_x, -1.0, 1.0));
@@ -70,7 +70,7 @@ public final class MainControl extends OpMode {
         else if (gamepad1.x)
             apply(device -> device.setPower(0), leftIntakeMotor, rightIntakeMotor);
 
-        if (gamepad2.b)
+        if (slideControlSwapButton.currentValue && slideControlSwapButton.previousValue)
             switch (slideSelection)
             {
                 case BASE:

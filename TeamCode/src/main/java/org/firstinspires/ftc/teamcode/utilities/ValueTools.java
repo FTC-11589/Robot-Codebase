@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.utilities;
 
 public class ValueTools {
+
+
     public enum MotionType {NONE, FORWARD, BACKWARD}
 
     public static MotionType getMotionType(double power) {
