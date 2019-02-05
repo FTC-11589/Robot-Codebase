@@ -1,7 +1,9 @@
 package org.firstinspires.ftc.teamcode.utilities;
 
 public class ValueTools {
-
+    public static int getInt(boolean value) {
+        return value ? 1 : 0;
+    }
 
     public enum MotionType {NONE, FORWARD, BACKWARD}
 

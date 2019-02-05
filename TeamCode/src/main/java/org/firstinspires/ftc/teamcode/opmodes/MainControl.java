@@ -1,31 +1,26 @@
 package org.firstinspires.ftc.teamcode.opmodes;
 
-import android.transition.Slide;
-
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.utilities.TrackedValue;
-import org.firstinspires.ftc.teamcode.utilities.ValueTools;
 
 import static org.firstinspires.ftc.teamcode.utilities.OperationTools.apply;
+import static org.firstinspires.ftc.teamcode.utilities.ValueTools.*;
 
 @TeleOp
 public final class MainControl extends OpMode {
     private DcMotorEx backLeftDriveMotor, backRightDriveMotor, baseSlideMotor, extensionSlideMotor;
     private DcMotor leftIntakeMotor, rightIntakeMotor;
-    private CRServo leftArmHingeServo, rightArmHingeServo;
+    private Servo leftArmHingeServo, rightArmHingeServo;
     private ElapsedTime timer = new ElapsedTime();
-    private SlideSelectionState slideSelection = SlideSelectionState.BASE;
     private TrackedValue<Boolean> slideControlSwapButton = new TrackedValue<>(() -> gamepad2.b);
-
-    enum SlideSelectionState {BASE, EXTENSION, BOTH}
 
     @Override
     public void init() {
@@ -35,13 +30,16 @@ public final class MainControl extends OpMode {
         extensionSlideMotor = (DcMotorEx) hardwareMap.dcMotor.get("slide_extension");
         leftIntakeMotor = hardwareMap.dcMotor.get("intake_left");
         rightIntakeMotor = hardwareMap.dcMotor.get("intake_right");
-        rightArmHingeServo = hardwareMap.crservo.get("arm_hinge_right");
-        leftArmHingeServo = hardwareMap.crservo.get("arm_hinge_left");
+        rightArmHingeServo = hardwareMap.servo.get("arm_hinge_right");
+        leftArmHingeServo = hardwareMap.servo.get("arm_hinge_left");
 
-        apply(device -> device.setDirection(DcMotorSimple.Direction.REVERSE), backLeftDriveMotor, leftIntakeMotor, extensionSlideMotor, leftArmHingeServo);
+        leftArmHingeServo.setDirection(Servo.Direction.REVERSE);
+
+        apply(device -> device.setDirection(DcMotorSimple.Direction.REVERSE), backLeftDriveMotor, leftIntakeMotor, extensionSlideMotor);
         apply(device -> device.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER), baseSlideMotor, extensionSlideMotor);
         apply(device -> device.setMode(DcMotor.RunMode.RUN_USING_ENCODER), backRightDriveMotor, backLeftDriveMotor, baseSlideMotor, extensionSlideMotor);
         apply(device -> device.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE), backLeftDriveMotor, backRightDriveMotor, baseSlideMotor, extensionSlideMotor);
+        apply(device -> device.setPosition(0), leftArmHingeServo, rightArmHingeServo);
 
         telemetry.setAutoClear(true);
         telemetry.setCaptionValueSeparator("\r\n\t");
@@ -70,39 +68,19 @@ public final class MainControl extends OpMode {
         else if (gamepad1.x)
             apply(device -> device.setPower(0), leftIntakeMotor, rightIntakeMotor);
 
-        if (slideControlSwapButton.currentValue && !slideControlSwapButton.previousValue)
-            switch (slideSelection)
-            {
-                case BASE:
-                    slideSelection = SlideSelectionState.EXTENSION;
-                    break;
-                case EXTENSION:
-                    slideSelection = SlideSelectionState.BOTH;
-                    break;
-                case BOTH:
-                    slideSelection = SlideSelectionState.BASE;
-                    break;
-            }
-
-        switch (slideSelection)
-        {
-            case BASE:
-                baseSlideMotor.setPower(REFERENCE_TARGET_SLIDE_POWER);
-                break;
-            case EXTENSION:
-                extensionSlideMotor.setPower(REFERENCE_TARGET_SLIDE_POWER * GEARED_POWER_FACTOR);
-                break;
-            case BOTH:
-                baseSlideMotor.setPower(REFERENCE_TARGET_SLIDE_POWER);
-                extensionSlideMotor.setPower(REFERENCE_TARGET_SLIDE_POWER * GEARED_POWER_FACTOR);
-                break;
+        if (REFERENCE_TARGET_SLIDE_POWER == 0) {
+            baseSlideMotor.setPower(-gamepad2.left_stick_y);
+            extensionSlideMotor.setPower(-gamepad2.right_stick_y * GEARED_POWER_FACTOR);
+        } else {
+            baseSlideMotor.setPower(REFERENCE_TARGET_SLIDE_POWER);
+            extensionSlideMotor.setPower(REFERENCE_TARGET_SLIDE_POWER * GEARED_POWER_FACTOR);
         }
-        apply(device -> device.setPower(Range.clip(-gamepad2.right_stick_y, -1.0, 1.0)), leftArmHingeServo, rightArmHingeServo);
 
-        telemetry.addData("Slide State [" + slideSelection + "]", "base " + ValueTools.getMotionTypeChar(baseSlideMotor.getPower()) + ": " + baseSlideMotor.getCurrentPosition() + ", extension "+ ValueTools.getMotionTypeChar(extensionSlideMotor.getPower()) + ": " + extensionSlideMotor.getCurrentPosition());
-        telemetry.addData("Slide State", "base: " + baseSlideMotor.getCurrentPosition());
-        telemetry.addData("Particle Containment Storage Arm Hinge Position/Inclination", "left " + ValueTools.getMotionTypeChar(leftArmHingeServo.getPower()) + ": " + leftArmHingeServo.getPower() + ", right " + ValueTools.getMotionTypeChar(rightArmHingeServo.getPower()) + ": " + rightArmHingeServo.getPower());
-        telemetry.addData("Intake System State", "left: " + ValueTools.getMotionTypeChar(leftIntakeMotor.getPower()) + " " + ValueTools.getMotionType(leftIntakeMotor.getPower()) + ", right: " + ValueTools.getMotionTypeChar(rightIntakeMotor.getPower()) + " " + ValueTools.getMotionType(rightIntakeMotor.getPower()));
+        apply(device -> device.setPosition(Range.clip(device.getPosition() + 0.01 * (getInt(gamepad2.right_bumper) - getInt(gamepad2.left_bumper)), 0, 0.07)), leftArmHingeServo, rightArmHingeServo);
+
+        telemetry.addData("Slide State", "base " + getMotionTypeChar(baseSlideMotor.getPower()) + ": " + baseSlideMotor.getCurrentPosition() + ", extension " + getMotionTypeChar(extensionSlideMotor.getPower()) + ": " + extensionSlideMotor.getCurrentPosition());
+        telemetry.addData("Particle Containment System Arm Hinge Position", "left: " + leftArmHingeServo.getPosition() + ", right: " + rightArmHingeServo.getPosition());
+        telemetry.addData("Intake Assembly State", "left: " + getMotionTypeChar(leftIntakeMotor.getPower()) + " " + getMotionType(leftIntakeMotor.getPower()) + ", right: " + getMotionTypeChar(rightIntakeMotor.getPower()) + " " + getMotionType(rightIntakeMotor.getPower()));
     }
 
     @Override

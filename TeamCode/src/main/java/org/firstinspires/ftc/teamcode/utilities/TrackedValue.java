@@ -16,7 +16,6 @@ public final class TrackedValue<T>
     {
         generator = valueGenerator;
         instances.add(this);
-        update();
     }
 
     public TrackedValue(@NonNull Func<T> valueGenerator, @NonNull Function<T, T> valueCoercer)
