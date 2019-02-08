@@ -16,24 +16,34 @@ public class MineralSamplingTest extends LinearOpMode
     @Override
     public void runOpMode() throws InterruptedException
     {
-
         // Initialize objects
         robot = new Robot(hardwareMap);
         auto = new Auto(this, robot);
 
+        GoldDetector.Position goldPos = GoldDetector.Position.NONE;
+
         auto.initSampling();
 
         waitForStart();
+        if(goldPos == GoldDetector.Position.NONE) {
+            goldPos = auto.attemptSampleMinerals(1000);
+        }
 
-        telemetry.addData("Mode", "running");
+        auto.rotate(160, 0.3);
+
+        telemetry.addData("Gold Mineral Position", goldPos.toString());
         telemetry.update();
 
-        while (opModeIsActive()) {
-            GoldDetector.Position goldPos = auto.attemptSampleMinerals(5);
-
-            telemetry.addData("Gold Mineral Position", goldPos.toString());
-            telemetry.update();
+        switch (goldPos){
+            case LEFT:
+                auto.rotate(21, 0.3);
+                break;
+            case RIGHT:
+                auto.rotate(-21, 0.3);
+                break;
         }
+
+        while (opModeIsActive());
     }
 
 

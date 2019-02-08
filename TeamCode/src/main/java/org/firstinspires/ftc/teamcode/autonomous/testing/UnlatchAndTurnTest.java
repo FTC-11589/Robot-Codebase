@@ -4,15 +4,12 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.teamcode.autonomous.Robot;
 import org.firstinspires.ftc.teamcode.autonomous.Auto;
+import org.firstinspires.ftc.teamcode.autonomous.Robot;
 
-@Autonomous(name="[TEST] Unlatching", group = "Tests")
-public class UnlatchingTest extends LinearOpMode
+@Autonomous(name="[TEST] Unlatch and Turn", group = "Tests")
+public class UnlatchAndTurnTest extends LinearOpMode
 {
     Robot robot;
     Auto auto;
@@ -36,6 +33,8 @@ public class UnlatchingTest extends LinearOpMode
             telemetry.update();
         }
         robot.baseSlideMotor.setPower(0.0);
+
+        auto.rotate(180, 0.7);
 
         while(opModeIsActive());
 

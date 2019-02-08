@@ -22,13 +22,25 @@ public class RotateAndDriveTest extends LinearOpMode
 
         waitForStart();
 
-        auto.driveForDistance(5, 0.8);
+        telemetry.addData("Step: ", "Driving for distance 1");
+        telemetry.update();
+
+        auto.driveForDistance(25, 0.8);
+
+        telemetry.addData("Step: ", "Rotating");
+        telemetry.update();
+
 
         auto.rotate(90, 0.3);
         auto.rotate(90, 0.3);
 
-        auto.driveForDistance(5, 0.8);
+        telemetry.addData("Step: ", "Driving for distance 2");
+        telemetry.update();
 
+
+        auto.driveForDistance(25, 0.8);
+
+        while (opModeIsActive());
     }
 
 

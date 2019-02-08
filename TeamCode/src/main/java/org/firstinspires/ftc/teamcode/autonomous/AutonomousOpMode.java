@@ -16,7 +16,7 @@ import org.firstinspires.ftc.teamcode.autonomous.Robot;
 import org.firstinspires.ftc.teamcode.utilities.GoldDetector;
 import org.firstinspires.ftc.teamcode.utilities.Navigation;
 
-@Autonomous(name="Drive Avoid Imu", group="Exercises")
+@Autonomous(name="Autonomous Mode", group="Exercises")
 public class AutonomousOpMode extends LinearOpMode
 {
     Robot robot;
@@ -63,20 +63,20 @@ public class AutonomousOpMode extends LinearOpMode
 
         switch (goldPos){
             case NONE:
-                auto.driveForDistance(15, 0.8);
+            case CENTER:
+                auto.driveForDistance(60, 0.8);
                 break;
             case LEFT:
-                auto.rotate(25, 0.5);
-                wait(1000);
-                auto.driveForDistance(15, 0.8);
-                break;
-            case CENTER:
-                auto.driveForDistance(15, 0.8);
+                auto.rotate(21, 0.3);
+                auto.driveForDistance(40, 0.8);
+                auto.rotate(-(21+37), 0.3);
+                auto.driveForDistance(25.3, 0.8);
                 break;
             case RIGHT:
-                auto.rotate(-25, 0.5);
-                wait(1000);
-                auto.driveForDistance(15, 0.8);
+                auto.rotate(-21, 0.3);
+                auto.driveForDistance(40, 0.8);
+                auto.rotate(21+37, 0.3);
+                auto.driveForDistance(25.3, 0.8);
                 break;
         }
 

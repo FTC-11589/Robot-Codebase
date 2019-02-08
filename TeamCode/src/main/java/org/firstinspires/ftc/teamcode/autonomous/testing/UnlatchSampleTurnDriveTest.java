@@ -4,15 +4,12 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.teamcode.autonomous.Robot;
 import org.firstinspires.ftc.teamcode.autonomous.Auto;
+import org.firstinspires.ftc.teamcode.autonomous.Robot;
 
-@Autonomous(name="[TEST] Unlatching", group = "Tests")
-public class UnlatchingTest extends LinearOpMode
+@Autonomous(name="[TEST] Unlatch, Sample, Turn and Drive to Crater", group = "Tests")
+public class UnlatchSampleTurnDriveTest extends LinearOpMode
 {
     Robot robot;
     Auto auto;
@@ -25,6 +22,8 @@ public class UnlatchingTest extends LinearOpMode
         robot = new Robot(hardwareMap);
         auto = new Auto(this, robot);
 
+        auto.initSampling();
+
         waitForStart();
 
         // Step 1: Land Robot
@@ -36,6 +35,10 @@ public class UnlatchingTest extends LinearOpMode
             telemetry.update();
         }
         robot.baseSlideMotor.setPower(0.0);
+
+        auto.rotate(160, 0.7);
+
+        auto.driveForDistance(35, 0.3);
 
         while(opModeIsActive());
 

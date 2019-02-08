@@ -22,14 +22,31 @@ public class RotateTest extends LinearOpMode
 
         waitForStart();
 
+        telemetry.addData("Step: ", "Rotating 1");
+        telemetry.update();
+
         auto.rotate(90, 0.3);
+
+        telemetry.addData("Step: ", "Rotating 2");
+        telemetry.update();
+
         auto.rotate(90, 0.3);
+
+        telemetry.addData("Step: ", "Rotating 3");
+        telemetry.update();
 
         auto.rotate(-90, 0.3);
+
+        telemetry.addData("Step: ", "Rotating 4");
+        telemetry.update();
+
         auto.rotate(-90, 0.3);
 
+        telemetry.addData("Step: ", "Done");
+        telemetry.update();
 
 
+        while (opModeIsActive());
 
     }
 

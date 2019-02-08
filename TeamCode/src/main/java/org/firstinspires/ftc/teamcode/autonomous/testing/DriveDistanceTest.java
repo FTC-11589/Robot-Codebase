@@ -21,15 +21,13 @@ public class DriveDistanceTest extends LinearOpMode
         robot = new Robot(hardwareMap);
         auto = new Auto(this, robot);
 
+        auto.resetDriveEncoders();
+
         waitForStart();
 
-        auto.driveForDistance(5, 0.8);
+        auto.driveForDistance(25, 0.5);
 
-        while (opModeIsActive()) {
-
-        }
-
-
+        while (opModeIsActive());
     }
 
 

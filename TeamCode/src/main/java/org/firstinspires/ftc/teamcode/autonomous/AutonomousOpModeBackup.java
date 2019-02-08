@@ -24,23 +24,15 @@ public class AutonomousOpModeBackup extends LinearOpMode {
         robot = new Robot(hardwareMap);
         auto = new Auto(this, robot);
 
-        telemetry.setAutoClear(true);
-        telemetry.setCaptionValueSeparator("\r\n");
-        telemetry.setItemSeparator(telemetry.getCaptionValueSeparator());
-
         telemetry.addData("Program Status", "Initialized");
 
         waitForStart();
 
         // Step 1: Land Robot
         robot.baseSlideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot.baseSlideMotor.setTargetPosition(-8435);
-        robot.baseSlideMotor.setPower(0.25);
-        while (opModeIsActive() && robot.baseSlideMotor.isBusy())
-        {
-            telemetry.addData("encoder-fwd", robot.baseSlideMotor.getCurrentPosition() + "  busy=" + robot.baseSlideMotor.isBusy());
-            telemetry.update();
-        }
+        robot.baseSlideMotor.setTargetPosition(9000);
+        robot.baseSlideMotor.setPower(0.8);
+        while (opModeIsActive() && robot.baseSlideMotor.isBusy());
         robot.baseSlideMotor.setPower(0.0);
 
         auto.rotate(180, 0.7);
@@ -55,8 +47,7 @@ public class AutonomousOpModeBackup extends LinearOpMode {
         robot.backLeftDriveMotor.setPower(1);
         robot.backRightDriveMotor.setPower(1);
 
-        while (opModeIsActive() && robot.backRightDriveMotor.isBusy() && robot.backLeftDriveMotor.isBusy()) {
-        }
+        while (opModeIsActive() && robot.backRightDriveMotor.isBusy() && robot.backLeftDriveMotor.isBusy());
 
         robot.backLeftDriveMotor.setPower(0);
         robot.backRightDriveMotor.setPower(0);
