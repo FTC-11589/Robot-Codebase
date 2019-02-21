@@ -9,8 +9,8 @@ import org.firstinspires.ftc.teamcode.autonomous.Auto;
 import org.firstinspires.ftc.teamcode.autonomous.Robot;
 import org.firstinspires.ftc.teamcode.utilities.GoldDetector;
 
-@Autonomous(name="[TEST] Unlatch, Sample, Turn and Drive", group = "Tests")
-public class UnlatchSampleTurnDriveTest extends LinearOpMode
+@Autonomous(name="[TEST] Unlatch, Sample, Turn and Drive to Depot", group = "Tests")
+public class UnlatchSampleTurnDriveToDepotTest extends LinearOpMode
 {
     Robot robot;
     Auto auto;
@@ -54,13 +54,19 @@ public class UnlatchSampleTurnDriveTest extends LinearOpMode
         switch (goldPos){
             case LEFT:
                 auto.rotate(25, 0.3);
+                auto.driveForDistance(35, 0.3);
+                break;
+            case NONE:
+            case CENTER:
+                auto.driveForDistance(45, 0.3);
                 break;
             case RIGHT:
                 auto.rotate(-25, 0.3);
+                auto.driveForDistance(35, 0.3);
                 break;
+
         }
 
-        auto.driveForDistance(35, 0.3);
 
         while(opModeIsActive());
 

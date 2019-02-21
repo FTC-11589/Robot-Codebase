@@ -27,6 +27,7 @@ public class Robot {
     public final int TICKS_PER_REVOLUTION = 1440; // Inches
     public final double CAMERA_FORWARD_DISPLACEMENT = 1.0; // Inches
     public final double CAMERA_LEFT_DISPLACEMENT = 1.0; // Inches
+    public final double ARM_HINGE_SERVO_MAX_POS = 0.7;
 
 
     public Robot(HardwareMap hardwareMap) {
@@ -54,7 +55,7 @@ public class Robot {
         OperationTools.apply(device -> device.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER), baseSlideMotor, extensionSlideMotor);
         OperationTools.apply(device -> device.setMode(DcMotor.RunMode.RUN_USING_ENCODER), backRightDriveMotor, backLeftDriveMotor, baseSlideMotor, extensionSlideMotor);
         OperationTools.apply(device -> device.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE), backLeftDriveMotor, backRightDriveMotor, baseSlideMotor, extensionSlideMotor);
-
+        OperationTools.apply(device -> device.setPosition(0), leftArmHingeServo, rightArmHingeServo);
     }
 
 }

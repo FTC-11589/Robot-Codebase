@@ -240,5 +240,18 @@ public class Auto {
         return goldPos;
     }
 
+    public void dropTeamMarker() {
+        opMode.resetStartTime();
+        while(opMode.opModeIsActive() && opMode.getRuntime() <= 2) {
+            robot.rightArmHingeServo.setPosition(robot.ARM_HINGE_SERVO_MAX_POS);
+            robot.leftArmHingeServo.setPosition(robot.ARM_HINGE_SERVO_MAX_POS);
+        }
+        opMode.resetStartTime();
+        while(opMode.opModeIsActive() && opMode.getRuntime() <= 2) {
+            robot.rightArmHingeServo.setPosition(0);
+            robot.leftArmHingeServo.setPosition(0);
+        }
+    }
+
 
 }

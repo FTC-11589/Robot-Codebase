@@ -13,75 +13,12 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 import org.firstinspires.ftc.teamcode.autonomous.Robot;
+import org.firstinspires.ftc.teamcode.autonomous.testing.UnlatchSampleTurnDriveTest;
 import org.firstinspires.ftc.teamcode.utilities.GoldDetector;
 import org.firstinspires.ftc.teamcode.utilities.Navigation;
 
-@Autonomous(name="Autonomous Mode", group="Exercises")
-public class AutonomousOpMode extends LinearOpMode
+@Autonomous(name="Autonomous Mode", group="Production")
+public class AutonomousOpMode extends UnlatchSampleTurnDriveTest
 {
-    Robot robot;
-    Auto auto;
-
-    @Override
-    public void runOpMode() throws InterruptedException
-    {
-
-        // Initialize objects
-        robot = new Robot(hardwareMap);
-        auto = new Auto(this, robot);
-
-        auto.initSampling();
-
-        waitForStart();
-
-        telemetry.addData("Mode", "Looking for gold mineral");
-        telemetry.update();
-
-        GoldDetector.Position goldPos = auto.attemptSampleMinerals(5);
-
-        // Step 1: Land Robot
-        robot.baseSlideMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.baseSlideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot.baseSlideMotor.setTargetPosition(11950);
-        robot.baseSlideMotor.setPower(0.7);
-        while (opModeIsActive() && robot.baseSlideMotor.isBusy())
-        {
-            telemetry.addData("encoder-fwd", robot.baseSlideMotor.getCurrentPosition() + "  busy=" + robot.baseSlideMotor.isBusy());
-            telemetry.update();
-
-        }
-        robot.baseSlideMotor.setPower(0.0);
-
-        if(goldPos == GoldDetector.Position.NONE) {
-            goldPos = auto.attemptSampleMinerals(3);
-        }
-
-        auto.rotate(180, 0.4);
-
-        telemetry.addData("Gold Mineral Position", goldPos.toString());
-        telemetry.update();
-
-        switch (goldPos){
-            case NONE:
-            case CENTER:
-                auto.driveForDistance(60, 0.8);
-                break;
-            case LEFT:
-                auto.rotate(21, 0.3);
-                auto.driveForDistance(40, 0.8);
-                auto.rotate(-(21+37), 0.3);
-                auto.driveForDistance(25.3, 0.8);
-                break;
-            case RIGHT:
-                auto.rotate(-21, 0.3);
-                auto.driveForDistance(40, 0.8);
-                auto.rotate(21+37, 0.3);
-                auto.driveForDistance(25.3, 0.8);
-                break;
-        }
-
-
-    }
-
 
 }
