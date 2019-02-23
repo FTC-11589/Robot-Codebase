@@ -30,7 +30,6 @@ public class Auto {
     public double robotAngle; // Angle relative to (0, 0) on field
     private double initialIMUHeading; // IMU when the robot first hits the floor
 
-
     public Auto(LinearOpMode opMode, Robot robot) {
         this.opMode = opMode;
         this.robot = robot;
@@ -132,8 +131,11 @@ public class Auto {
      * Rotate left or right the number of degrees. Does not support turning more than 180 degrees.
      * @param degrees Degrees to turn, + is left - is right
      */
-    public void rotate(int degrees, double power) {
+    public void rotate(int degrees, double power, double timeout) {
 
+        opMode.resetStartTime();
+
+        resetDriveEncoders();
         robot.backRightDriveMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         robot.backLeftDriveMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
@@ -160,11 +162,11 @@ public class Auto {
         // rotate until turn is completed.
         if (degrees < 0) {
             // On right turn we have to get off zero first.
-            while (opMode.opModeIsActive() && getAngle() > 0) {}
+            while (opMode.opModeIsActive() && getAngle() > 0 && opMode.getRuntime() <= timeout) {}
 
-            while (opMode.opModeIsActive() && getAngle() > degrees) {}
+            while (opMode.opModeIsActive() && getAngle() > degrees && opMode.getRuntime() <= timeout) {}
         } else {    // left turn.
-            while (opMode.opModeIsActive() && getAngle() < degrees) {}
+            while (opMode.opModeIsActive() && getAngle() < degrees && opMode.getRuntime() <= timeout) {}
         }
 
         // turn the motors off.
@@ -172,7 +174,101 @@ public class Auto {
         robot.backRightDriveMotor.setPower(0);
 
         // wait for rotation to stop.
-        opMode.sleep(1000);
+        opMode.sleep(50);
+
+        // reset angle tracking on new heading.
+        resetAngle();
+    }
+
+    public void rotate(int degrees, double power) {
+        rotate(degrees, power, 99999);
+    }
+
+    public void rotateRightPivot(int degrees, double power, double timeout) {
+        opMode.resetStartTime();
+
+
+        resetDriveEncoders();
+
+        robot.backRightDriveMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.backLeftDriveMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        double leftPower;
+
+        // restart imu movement tracking.
+        resetAngle();
+
+        // getAngle() returns + when rotating counter clockwise (left) and - when rotating
+        // clockwise (right).
+
+        if (degrees < 0) {   // turn right.
+            leftPower = power;
+        } else if (degrees > 0) {   // turn left.
+            leftPower = -power;
+        } else return;
+
+        // set power to rotate.
+        robot.backLeftDriveMotor.setPower(leftPower);
+
+        // rotate until turn is completed.
+        if (degrees < 0) {
+            // On right turn we have to get off zero first.
+            while (opMode.opModeIsActive() && getAngle() > 0 && opMode.getRuntime() <= timeout) {}
+
+            while (opMode.opModeIsActive() && getAngle() > degrees && opMode.getRuntime() <= timeout) {}
+        } else {    // left turn.
+            while (opMode.opModeIsActive() && getAngle() < degrees && opMode.getRuntime() <= timeout) {}
+        }
+
+        // turn the motors off.
+        robot.backLeftDriveMotor.setPower(0);
+
+        // wait for rotation to stop.
+        opMode.sleep(50);
+
+        // reset angle tracking on new heading.
+        resetAngle();
+    }
+
+    public void rotateLeftPivot(int degrees, double power, double timeout) {
+        opMode.resetStartTime();
+
+        resetDriveEncoders();
+        robot.backRightDriveMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.backLeftDriveMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        double rightPower;
+
+        // restart imu movement tracking.
+        resetAngle();
+
+        // getAngle() returns + when rotating counter clockwise (left) and - when rotating
+        // clockwise (right).
+
+        if (degrees < 0) {   // turn right.
+            rightPower = -power;
+        } else if (degrees > 0) {   // turn left.
+            rightPower = power;
+        } else return;
+
+        // set power to rotate.
+        robot.backRightDriveMotor.setPower(rightPower);
+
+        // rotate until turn is completed.
+        if (degrees < 0) {
+            // On right turn we have to get off zero first.
+            while (opMode.opModeIsActive() && getAngle() > 0 && opMode.getRuntime() <= timeout) {}
+
+            while (opMode.opModeIsActive() && getAngle() > degrees && opMode.getRuntime() <= timeout) {}
+        } else {    // left turn.
+            while (opMode.opModeIsActive() && getAngle() < degrees && opMode.getRuntime() <= timeout) {}
+        }
+
+        // turn the motors off.
+        robot.backRightDriveMotor.setPower(0);
+
+        // wait for rotation to stop.
+        opMode.sleep(50);
 
         // reset angle tracking on new heading.
         resetAngle();
@@ -217,6 +313,9 @@ public class Auto {
 
         robot.backRightDriveMotor.setPower(0);
         robot.backLeftDriveMotor.setPower(0);
+
+        opMode.sleep(50);
+
     }
 
     /**
@@ -251,6 +350,19 @@ public class Auto {
             robot.rightArmHingeServo.setPosition(0);
             robot.leftArmHingeServo.setPosition(0);
         }
+    }
+
+    public void land(boolean retract) {
+        robot.baseSlideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        robot.baseSlideMotor.setTargetPosition((retract ? -1 : 1) * robot.SLIDE_UNLATCH_ENCODER_VALUE);
+        robot.baseSlideMotor.setPower(0.8);
+        while (opMode.opModeIsActive() && robot.baseSlideMotor.isBusy());
+        robot.baseSlideMotor.setPower(0.0);
+        opMode.sleep(500);
+    }
+
+    public void land() {
+        land(false);
     }
 
 

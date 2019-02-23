@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.autonomous.testing;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
@@ -8,6 +9,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.autonomous.Auto;
 import org.firstinspires.ftc.teamcode.autonomous.Robot;
 
+@Disabled
 @Autonomous(name="[TEST] Unlatch, Turn and Drive to Crater", group = "Tests")
 public class UnlatchTurnDriveTest extends LinearOpMode
 {

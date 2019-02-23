@@ -27,7 +27,8 @@ public class Robot {
     public final int TICKS_PER_REVOLUTION = 1440; // Inches
     public final double CAMERA_FORWARD_DISPLACEMENT = 1.0; // Inches
     public final double CAMERA_LEFT_DISPLACEMENT = 1.0; // Inches
-    public final double ARM_HINGE_SERVO_MAX_POS = 0.7;
+    public final double ARM_HINGE_SERVO_MAX_POS = 0.6;
+    public final int SLIDE_UNLATCH_ENCODER_VALUE = 12000;
 
 
     public Robot(HardwareMap hardwareMap) {
